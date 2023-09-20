@@ -1,0 +1,180 @@
+========
+Database
+========
+> SHOW DATABASES; 
+> CREATE DATABASE <dbNAME>; 
+> DROP DATABASE; 
+> USE <dbNAME>;
+
+=====
+Table
+=====
+----------
+SQL syntax 
+----------
+> SHOW TABLES; 
+> CREATE TABLE <tbName> (
+  COL1 TYPE, 
+  COL2 TYPE,
+); 
+> INSERT INTO <tbNAME> (
+  COL1,
+  COL2,
+  ...
+  ) VALUES (
+  DATA1,
+  DAT12,
+  ..
+  ); 
+> SELECT *FROM <tbName>
+> DROP TABLE <tbName> 
+-------------------------------------------------------------
+e.g.
+  CREATE TABLE product(
+    id INT,
+    name varchar(255),
+    price INT
+);
+INSERT INTO product (id,name,price) VALUES (1, 'LATTE', 50);
+SELECT * FROM product;
+DROP TABLE product;
+
+============================================================
+PRIMARY KEY: 獨一無二不可重複，代表每一筆資料的編號
+AUTO_INCREMENT: 搭配PRIMARY KEY使用，每次新增資料會自動將編號+1
+NOT NULL 欄位不接受空值
+DEFAULT 欄位的預設值
+============================================================
+e.g. 
+> CREATE TABLE product(
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name varchar(255) NOT NULL,
+    price INT NOT NULL DEFAULT 30
+  );
+
+===========================================================
+------
+FILTER 
+------
+= EQUAL
+<> : NOT EQUAL
+> : GREATER THAN
+< : LESS THAN
+AND/OR
+----------
+SQL syntax 
+----------
+> SELECT * FROM <tbName> WHERE <FILTER>;
+> SELECT COL1, COL3, COL4,... FROM <tbName> WHERE <FILTER>;
+===========================================================
+e.g. 
+> SELECT * FROM product WHERE price=45;
+> SELECT * FROM product WHERE price<>40 AND name='LATTE';
+> SELECT * FROM product WHERE price<>40 OR name='LATTE';
+
+> SELECT name, price FROM product WHERE price=45;
+> SELECT id, name FROM product;
+
+===========================================================================
+> UPDATE <tbName> SET colName1=<newData>, colName2=<newData2>,...WHERE FILTER
+> DELETE FROM <tbName> WHERE FILTER
+===========================================================================
+e.g.
+> SET SQL_SAFE_UPDATES=0; 
+> UPDATE product SET price=50 WHERE name='MILKTEA';
+> UPDATE product SET name='WENSHAN GREEN TEA', price=25 WHERE name="GREENTEA"; 
+> UPDATE product SET price=35 WHERE price<=35;
+> UPDATE product SET price=60; //All price will be set to $60
+> DELETE FROM product WHERE name='MILK'; 
+> DELETE FROM product; //All data will be deleted
+
+============
+JOIN 合併查詢
+============
+分割資料表再關聯(讓表格乾淨俐落)
+當要做進一步查詢，可以合併兩個以上的TABLE
+> SELECT * FROM <tbNAME1> INNER JOIN <tbNAME2> ON <CONDITION> //全部欄位
+> SELECT <tb1>.col1, <tb2>.col3... FROM <tbNAME1> INNER JOIN <tbNAME2> ON <CONDITION> //取得部分欄位
+
+e.g. 
+> CREATE TABLE product(
+ id INT PRIMARY KEY AUTO_INCREMENT,
+ name varchar(255) NOT NULL
+ ); 
+ 
+> CREATE TABLE variant(
+ id INT PRIMARY KEY AUTO_INCREMENT,
+ product_id INT,
+ size varchar(2) NOT NULL, 
+ price INT NOT NULL DEFAULT 30
+); 
+
+> SELECT * FROM product INNER JOIN variant ON product.id = variant.product_id;
+> SELECT product.name, variant.size, variant.price FROM product INNER JOIN variant ON product.id = variant.product_id;
+
+================================================
+INNER JOIN 只取出有對應到的資料(適用於完全對應的資料)
+LEFT JOIN 包含左邊未對應到的資料
+> SELECT * FROM <tbNAME1> LEFT JOIN <tbNAME2> ON <CONDITION>
+RIGHT JOIN 包含右邊未對應到的資料
+> SELECT * FROM <tbNAME1> RIGHT JOIN <tbNAME2> ON <CONDITION>
+
+e.g. 
+> SELECT * FROM product INNER JOIN variant ON product.id = variant.product_id;
+> SELECT * FROM product LEFT JOIN variant ON product.id = variant.product_id;
+> SELECT * FROM product RIGHT JOIN variant ON product.id = variant.product_id;
+
+================================================
+FOREIGN KEY 明確的建立關聯性，防止資料缺漏，保持一致性
+在刪除時會自動檢查是否有關連的資料，有關聯的資料就會報錯
+> ALTER TABLE <tbNAME1> ADD FOREIGN KEY(col) REFERENCES <tbNAME2>(primary_col)
+
+e.g.
+> ALTER TABLE variant ADD foreign key(product_id) references product(id); 
+
+=============================================================
+INDEX 索引 以資料結構為單位，建立額外的資料結構，有效的提高搜尋速度
+> ALTER TABLE <tbNAME> ADD INDEX index_name(name) 
+* PRIMARY KEY 也是一種索引
+> ALTER TABLE <tbNAME> DROP INDEX index_name //移除索引 
+
+取得指令運作資訊: 
+> EXPLAIN SELECT..
+> EXPLAIN INSERT..
+> EXPLAIN UPDATE..
+> EXPLAIN DELETE..
+
+e.g. 
+> ALTER TABLE product ADD INDEX name_index(name);
+> EXPLAIN SELECT * FROM product WHERE NAME = "CINTEA";
+> ALTER TABLE product DROP INDEX name_index; 
+
+==============================================
+AGGREGATE FUNCTION 根據欄位資料進行統計得到的結果
+GROUP BY 根據某個欄位切分要放在一起統計的群組
+==============================================
+COUNT(): 計算幾筆資料
+SUM(): 計算總和
+MAX(): 最大值
+MIN(): 最小值
+AVG(): 平均值
+STD(): 標準差
+> SELECT AVG(price) FROM variant GROUP BY product_id;
+
+e.g. 
+> SELECT AVG(price) FROM variant; 
+> SELECT AVG(price), MAX(price), STD(price) FROM variant; //同時取得三種統計資料
+
+> SELECT AVG(price) FROM variant GROUP BY product_id; //按id分群
+> SELECT product_id, AVG(price)FROM variant GROUP BY product_id; 
+> SELECT size, AVG(price)FROM variant GROUP BY size; //按size分群
+
+> SELECT product.name, AVG(variant.price) FROM variant INNER JOIN product ON variant.product_id = product.id GROUP BY variant.product_id; 
+
+
+
+
+
+
+
+
